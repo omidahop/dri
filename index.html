@@ -83,21 +83,12 @@
                             <div class="user-name" id="userName">کاربر میهمان</div>
                             <div class="user-role">اپراتور تجهیزات</div>
                         </div>
-                        <!-- In the data entry user info card -->
-<div class="d-flex gap-2">
-   <!--  <button class="btn btn-error btn-sm" onclick="clearAllCache()">
-        <i class="fas fa-trash-alt"></i>
-        پاک کردن کامل کش
-    </button>
-    <button class="btn btn-warning btn-sm" onclick="clearDateSpecificCache()">
-        <i class="fas fa-broom"></i>
-        پاک کردن کش روزهای قبل
-    </button> -->
-    <button class="btn btn-primary btn-sm" onclick="showUserModal()">
-        <i class="fas fa-edit"></i>
-        ویرایش
-    </button>
-</div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm" onclick="showUserModal()">
+                                <i class="fas fa-edit"></i>
+                                ویرایش
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -105,8 +96,12 @@
                     <div class="card-header">
                         <h2 class="card-title">
                             <i class="fas fa-edit"></i>
-                            ثبت داده‌های ویبره
+                            ثبت داده‌های ویبره - روز جاری
                         </h2>
+                        <div class="current-date-info">
+                            <i class="fas fa-calendar"></i>
+                            <span id="currentDateDisplay">...</span>
+                        </div>
                     </div>
                     
                     <!-- Tab Buttons -->
@@ -123,15 +118,6 @@
                     
                     <!-- New Entry Mode -->
                     <div id="newEntryMode">
-                        <!-- Date Selection for New Entry -->
-                        <div class="form-group">
-                            <label class="form-label">انتخاب تاریخ:</label>
-                            <div class="d-flex gap-2 align-center">
-                                <input type="date" class="form-control" id="entryDateInput">
-                                <small class="text-secondary">تاریخ مورد نظر برای ثبت داده را انتخاب کنید</small>
-                            </div>
-                        </div>
-                        
                         <!-- Unit Selection -->
                         <div class="form-group">
                             <label class="form-label">انتخاب واحد:</label>
@@ -150,7 +136,7 @@
                         <!-- Data Entry Header -->
                         <div class="data-entry-header d-none" id="entryHeader">
                             <div class="current-unit" id="currentUnit">واحد احیا مستقیم 1</div>
-                            <div class="current-date" id="currentDate">تاریخ انتخابی</div>
+                            <div class="current-date" id="currentDate">تاریخ امروز</div>
                             <div class="current-equipment" id="currentEquipment">
                                 <i class="fas fa-cog"></i>
                                 گیربکس کمپرسور 48A
@@ -162,14 +148,55 @@
                             <div class="progress-bar">
                                 <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                             </div>
+                            
+                            <!-- Note Section -->
+                            <div class="note-section" id="noteSection">
+                                <div class="note-header">
+                                    <button class="note-toggle-btn" id="noteToggleBtn" onclick="toggleNote()">
+                                        <i class="fas fa-sticky-note"></i>
+                                        یادداشت
+                                    </button>
+                                    <div class="note-status" id="noteStatus">
+                                        <i class="fas fa-circle"></i>
+                                        بدون یادداشت
+                                    </div>
+                                </div>
+                                
+                                <div class="note-content" id="noteContent">
+                                    <textarea 
+                                        class="note-textarea" 
+                                        id="noteTextarea"
+                                        placeholder="یادداشت مربوط به این تجهیز را اینجا بنویسید... (اختیاری)"
+                                        maxlength="500">
+                                    </textarea>
+                                    
+                                    <div class="note-controls">
+                                        <div class="note-info">
+                                            <i class="fas fa-info-circle"></i>
+                                            حداکثر 500 کاراکتر
+                                        </div>
+                                        <div class="note-actions">
+                                            <button class="note-save-btn" onclick="saveEquipmentNote()">
+                                                <i class="fas fa-save"></i>
+                                                ذخیره
+                                            </button>
+                                            <button class="note-clear-btn" onclick="clearEquipmentNote()">
+                                                <i class="fas fa-trash"></i>
+                                                پاک
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Data Input Area -->
                         <div class="data-input-area d-none" id="inputArea">
                             <input type="number" class="form-control large" id="dataInput" 
                                    placeholder="مقدار را وارد کنید..." 
-                                   min="0" max="20" step="0.01">
-                            <div class="mt-2">
+                                   min="0" step="0.01" 
+                                   aria-label="ورودی داده ویبره">
+                            <div class="mt-2" id="rangeInfo">
                                 <small class="text-secondary">حداکثر مقدار: 20 | Enter برای ثبت</small>
                             </div>
                         </div>
@@ -189,15 +216,6 @@
                     
                     <!-- Edit Mode -->
                     <div id="editMode" class="d-none">
-                        <!-- Date Selection for Edit -->
-                        <div class="form-group">
-                            <label class="form-label">انتخاب تاریخ:</label>
-                            <div class="d-flex gap-2 align-center">
-                                <input type="date" class="form-control" id="editDateInput">
-                                <small class="text-secondary">تاریخ موردنظر برای ویرایش را انتخاب کنید</small>
-                            </div>
-                        </div>
-                        
                         <!-- Unit Selection for Edit -->
                         <div class="form-group">
                             <label class="form-label">انتخاب واحد:</label>
@@ -236,8 +254,9 @@
                             </div>
                             <input type="number" class="form-control large" id="editDataInput" 
                                    placeholder="مقدار جدید را وارد کنید..." 
-                                   min="0" max="20" step="0.01">
-                            <div class="mt-2">
+                                   min="0" step="0.01"
+                                   aria-label="ورودی ویرایش داده">
+                            <div class="mt-2" id="editRangeInfo">
                                 <small class="text-secondary">حداکثر مقدار: 20</small>
                             </div>
                         </div>
@@ -576,24 +595,25 @@
                             ادغام با دیتابیس جاری
                         </button>
                     </div>
-					<!-- In the database section -->
-<div class="card mt-3">
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="fas fa-exclamation-triangle"></i>
-            بازنشانی کامل سیستم
-        </h3>
-    </div>
-    <div class="text-center p-3">
-        <p class="text-warning mb-3">
-            <strong>هشدار:</strong> این عمل تمام داده‌ها، تنظیمات و کش را پاک می‌کند و قابل بازگشت نیست!
-        </p>
-        <button class="btn btn-error btn-lg" onclick="resetApplicationCompletely()">
-            <i class="fas fa-bomb"></i>
-            بازنشانی کامل سیستم
-        </button>
-    </div>
-</div>
+
+                    <!-- System Reset -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                بازنشانی کامل سیستم
+                            </h3>
+                        </div>
+                        <div class="text-center p-3">
+                            <p class="text-warning mb-3">
+                                <strong>هشدار:</strong> این عمل تمام داده‌ها، تنظیمات و کش را پاک می‌کند و قابل بازگشت نیست!
+                            </p>
+                            <button class="btn btn-error btn-lg" onclick="resetApplicationCompletely()">
+                                <i class="fas fa-bomb"></i>
+                                بازنشانی کامل سیستم
+                            </button>
+                        </div>
+                    </div>
                     
                     <!-- Database Stats -->
                     <div class="card mt-3">
@@ -701,30 +721,58 @@
                         </div>
                     </div>
                     
-                    <!-- Priority Settings Info -->
+                    <!-- Data Entry Priority Settings -->
                     <div class="card mt-3">
                         <div class="card-header">
                             <h3 class="card-title">
-                                <i class="fas fa-info-circle"></i>
-                                راهنمای اولویت‌بندی
+                                <i class="fas fa-list"></i>
+                                اولویت‌بندی تجهیزات ثبت داده - 12 تجهیز هر واحد
                             </h3>
                         </div>
-                        <div class="priority-info">
-                            <p><strong>توجه:</strong> اولویت‌بندی تجهیزات و پارامترها فقط در قسمت اسلایدشو استفاده می‌شود.</p>
-                            <ul>
-                                <li>اولویت تجهیزات: شماره 1 تا 24 (12 تجهیز × 2 واحد)</li>
-                                <li>اولویت پارامترها: شماره 1 تا 12</li>
-                                <li>امکان انتخاب حالت اولویت پارامترها</li>
-                            </ul>
+                        <div class="priority-grid" id="dataEntryEquipmentPriority">
+                            <!-- Data entry equipment priority items will be populated by JavaScript -->
                         </div>
                     </div>
                     
-                    <!-- Equipment Priority -->
+                    <!-- Data Entry Parameter Priority -->
                     <div class="card mt-3">
                         <div class="card-header">
                             <h3 class="card-title">
                                 <i class="fas fa-sort-numeric-down"></i>
-                                اولویت تجهیزات - 24 تجهیز (فقط برای اسلایدشو)
+                                اولویت پارامترها در ثبت داده
+                            </h3>
+                        </div>
+                        
+                        <!-- Data Entry Parameter Mode Selector -->
+                        <div class="parameter-mode-selector" id="dataEntryParameterMode">
+                            <label class="form-label">حالت اولویت‌بندی ثبت داده:</label>
+                            <div class="mode-options">
+                                <div class="mode-option selected" onclick="setDataEntryParameterMode('default')">
+                                    <input type="radio" name="dataEntryParameterMode" value="default" checked>
+                                    <span>ترتیب پیش‌فرض (V1→GV1→H1→...)</span>
+                                </div>
+                                <div class="mode-option" onclick="setDataEntryParameterMode('velocity-first')">
+                                    <input type="radio" name="dataEntryParameterMode" value="velocity-first">
+                                    <span>ابتدا سرعت، سپس شتاب</span>
+                                </div>
+                                <div class="mode-option" onclick="setDataEntryParameterMode('custom')">
+                                    <input type="radio" name="dataEntryParameterMode" value="custom">
+                                    <span>اولویت دلخواه</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="priority-grid" id="dataEntryParameterPriority">
+                            <!-- Data entry parameter priority items will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Slideshow Priority Settings (Existing) -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-play"></i>
+                                اولویت‌بندی اسلایدشو - 24 تجهیز
                             </h3>
                         </div>
                         <div class="priority-grid" id="equipmentPriority">
@@ -732,21 +780,25 @@
                         </div>
                     </div>
                     
-                    <!-- Parameter Priority -->
+                    <!-- Slideshow Parameter Priority -->
                     <div class="card mt-3">
                         <div class="card-header">
                             <h3 class="card-title">
                                 <i class="fas fa-list-ol"></i>
-                                اولویت پارامترها (فقط برای اسلایدشو)
+                                اولویت پارامترها در اسلایدشو
                             </h3>
                         </div>
                         
                         <!-- Parameter Mode Selector -->
-                        <div class="parameter-mode-selector">
-                            <label class="form-label">حالت اولویت‌بندی:</label>
+                        <div class="parameter-mode-selector" id="slideshowParameterMode">
+                            <label class="form-label">حالت اولویت‌بندی اسلایدشو:</label>
                             <div class="mode-options">
-                                <div class="mode-option selected" onclick="setParameterMode('velocity-first')">
-                                    <input type="radio" name="parameterMode" value="velocity-first" checked>
+                                <div class="mode-option selected" onclick="setParameterMode('default')">
+                                    <input type="radio" name="parameterMode" value="default" checked>
+                                    <span>ترتیب پیش‌فرض (V1→GV1→H1→...)</span>
+                                </div>
+                                <div class="mode-option" onclick="setParameterMode('velocity-first')">
+                                    <input type="radio" name="parameterMode" value="velocity-first">
                                     <span>ابتدا سرعت، سپس شتاب</span>
                                 </div>
                                 <div class="mode-option" onclick="setParameterMode('custom')">
@@ -789,11 +841,13 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label class="form-label">نام کاربری:</label>
-                    <input type="text" class="form-control" id="userNameInput" placeholder="نام خود را وارد کنید">
+                    <input type="text" class="form-control" id="userNameInput" 
+                           placeholder="نام خود را وارد کنید"
+                           aria-label="نام کاربری">
                 </div>
                 <div class="form-group">
                     <label class="form-label">سمت:</label>
-                    <select class="form-control" id="userRole">
+                    <select class="form-control" id="userRole" aria-label="سمت کاربری">
                         <option value="اپراتور تجهیزات">اپراتور تجهیزات</option>
                         <option value="تکنسین">تکنسین</option>
                         <option value="مهندس">مهندس</option>
